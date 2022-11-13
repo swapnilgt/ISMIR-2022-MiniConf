@@ -7,10 +7,38 @@ class Papers:
     """
     This method takes the config data loaded and the papers csv file.
     """
-    def __init__(self, papersCsvFile, townscriptCsvFile):
+    def __init__(self, papersCsvFile):
         self.papersCsvFile = papersCsvFile
-        self.townscriptCsvFile = townscriptCsvFile
         self.useDummyValues = True
+
+    """
+    This method inputs the zoomUtils and setup zoom calls for the all the sessions.
+    """
+    def setupSlackChannels(self, slackUtils):
+        if(self.papersCsvFile is None):
+            raise Exception("self.papersCsvFile passed in contructor is null")
+        
+        # Reading the papers data.
+        csv_data = pd.read_csv(self.papersCsvFile)
+
+        slack_channel_column = "slack_channel"
+
+        csv_data.loc[:, slack_channel_column] = ""
+
+        # Iterating over each row and creating the slack_channel_column
+        for index, row in csv_data.iterrows():
+            csv_data.loc[index, slack_channel_column] = "poster-day" + str(row["day"]) + "-session" + str(row["session"])
+
+        print("Data after adding the slack column channel: ", csv_data)
+        # Updating the file with the details to be able to write the slack columns.
+        csv_data.to_csv(self.papersCsvFile)
+        
+        print("########### Now creating slack channels ##########")
+        slackUtils.createPrivateSlackChannels(slackUtils.client, self.papersCsvFile, slack_channel_column)
+
+        # Adding the channel link to the file.
+        slackUtils.addChannelLinksToCSV(slackUtils.client, self.papersCsvFile, slack_channel_column)
+        
     
     """
     This method inputs the zoomUtils and setup zoom calls for the all the sessions.
