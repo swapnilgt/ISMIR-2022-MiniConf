@@ -123,6 +123,9 @@ class Tutorials:
         
         # print("Data after copying channel_urls: ", csv_data)
 
+        # Owerwriting the file.
+        csv_data.to_csv(self.eventsCsvFile)
+
         # Removing the temporary file since the work is done.
         os.remove(tutorials_file_name)
 
