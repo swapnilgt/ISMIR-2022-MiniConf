@@ -1,6 +1,7 @@
 import pandas as pd
 import copy
 import os
+import numpy as np
 
 
 MORNING_TUTORIAL_COL = "Select the morning session tutorial you wish to attend"
@@ -41,8 +42,10 @@ class Tutorials:
         # Creating slack channels ...
         print("Trying to create channels if already not created")
         slackUtils.createPrivateSlackChannels(slackUtils.client, tutorials_file_name, "slack_channel")
-        # Removing the file since the work is done.
-        os.remove(tutorials_file_name)
+
+        # Adding the channel link to the file.
+        slackUtils.addChannelLinksToCSV(slackUtils.client, tutorials_file_name, "slack_channel")
+        
 
         print("############################################") 
         print("#########Creating of channels done##########") 
@@ -107,6 +110,21 @@ class Tutorials:
             for email in channel_email_tuple[1]:
                 print("Adding user ", email, " to channel ", channel_email_tuple[0])
                 slackUtils.inviteUserToChannel(slackUtils.client, email, channel_email_tuple[0].replace("#", ''))
+
+        # Adding the slack channel URL to the original file.
+        csv_data = pd.read_csv(self.eventsCsvFile)
+        tutorials_data = pd.read_csv(tutorials_file_name)
+        
+        for i, row_with_url in tutorials_data.iterrows():
+            for j, row_wo_url in csv_data.iterrows():
+                if(row_with_url["slack_channel"] == row_wo_url["slack_channel"]):
+                    print("Adding URL ", row_with_url["channel_url"], " to ", row_with_url["title"])
+                    csv_data.loc[j, "channel_url"] = row_with_url["channel_url"]
+        
+        # print("Data after copying channel_urls: ", csv_data)
+
+        # Removing the temporary file since the work is done.
+        os.remove(tutorials_file_name)
 
 
 def getCleanTitle(incoming):

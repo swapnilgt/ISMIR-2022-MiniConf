@@ -199,10 +199,10 @@ def addChannelLinksToCSV(slackClient, csvFile, channelColumnName, newCsvFile = N
         newCsvFile (string): If None, the function will overwrite in csvFile, else will write the csvFile with links in a newCsvFile
     """
     if newCsvFile is not None:
-        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_link', newCsvFile)
+        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_url', newCsvFile)
         paper_data = pd.read_csv(newCsvFile)
     else:
-        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_link')
+        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_url')
         paper_data = pd.read_csv(csvFile)
 
     channels = paper_data[channelColumnName]
@@ -210,7 +210,7 @@ def addChannelLinksToCSV(slackClient, csvFile, channelColumnName, newCsvFile = N
     for i, channelName in enumerate(channels):
         try:
             if isChannel(channelName) == True:
-                paper_data['channel_link'][i] = 'https://slack.com/app_redirect?channel='+getChannelID(slackClient, channelName)
+                paper_data['channel_url'][i] = 'https://slack.com/app_redirect?channel='+getChannelID(slackClient, channelName)
         except:
             print(f'Bot not in channel - {channelName}')
 
