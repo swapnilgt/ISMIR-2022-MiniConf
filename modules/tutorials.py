@@ -69,7 +69,10 @@ class Tutorials:
 
         # Reading all the titles
         for index, entry in csv_data.iterrows():
-            titles[entry["title"]] = (entry["slack_channel"], [])
+            titles[entry["title"].lower()] = (entry["slack_channel"], [])
+
+        # Creating a lower case list.
+        # titles_lower_case = {title.lower(): title, val in titles.items()} 
         
         # Cleaning the data bit. Removing the trailing quotes and equal to.
         townscript_data = pd.read_csv(self.townscriptCsvFile)
@@ -131,4 +134,4 @@ class Tutorials:
 
 
 def getCleanTitle(incoming):
-    return str(incoming).replace('"', '').replace('=', '')
+    return str(incoming).replace('"', '').replace('=', '').lower()
