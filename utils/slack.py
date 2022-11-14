@@ -74,6 +74,9 @@ def get_all_user_data(slackClient):
     # print(all_user_data)
     return all_user_data
 
+# Loading all user data.
+all_user_data = get_all_user_data(client)
+
 # Get all channel data
 # conversations_list required the channel:read bot scope
 # limit sets the number of channels which we want to output, 1000 is the limit, default: 100
@@ -115,7 +118,7 @@ def getChannelID(slackClient, channelName):
 
 # Obtain User ID given user email
 def getUserID(slackClient, user_email):
-    user_data = get_all_user_data(slackClient)
+    user_data = all_user_data
     for user in user_data:
         if user['user_email'] == user_email:
             return user['user_id']
@@ -123,7 +126,7 @@ def getUserID(slackClient, user_email):
 
 # Obtain user email given user id
 def getUserEmail(slackClient, user_id):
-    user_data = get_all_user_data(slackClient)
+    user_data = all_user_data
     for user in user_data:
         if user['user_id'] == user_id:
             return user['user_email']
@@ -163,8 +166,8 @@ def createPrivateSlackChannels(slackClient, csvFile, channelColumnName):
         if isChannel(channelName) == False:
             try:
                 createSlackChannelAsBot(slackClient, channelName, True)
-            except SlackApiError: # set proper exception
-                print(f"Channel exists, but BOT not added to '{channelName}'")
+            except SlackApiError as e: # set proper exception
+                print("Exception in creating channel: ", e)
 
 
 def createEmptyLinkColumnInCSVifNotPresent(csvFile, column_name, newCsvFile = None):
@@ -196,10 +199,10 @@ def addChannelLinksToCSV(slackClient, csvFile, channelColumnName, newCsvFile = N
         newCsvFile (string): If None, the function will overwrite in csvFile, else will write the csvFile with links in a newCsvFile
     """
     if newCsvFile is not None:
-        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_link', newCsvFile)
+        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_url', newCsvFile)
         paper_data = pd.read_csv(newCsvFile)
     else:
-        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_link')
+        createEmptyLinkColumnInCSVifNotPresent(csvFile, 'channel_url')
         paper_data = pd.read_csv(csvFile)
 
     channels = paper_data[channelColumnName]
@@ -207,7 +210,7 @@ def addChannelLinksToCSV(slackClient, csvFile, channelColumnName, newCsvFile = N
     for i, channelName in enumerate(channels):
         try:
             if isChannel(channelName) == True:
-                paper_data['channel_link'][i] = 'https://slack.com/app_redirect?channel='+getChannelID(slackClient, channelName)
+                paper_data['channel_url'][i] = 'https://slack.com/app_redirect?channel='+getChannelID(slackClient, channelName)
         except:
             print(f'Bot not in channel - {channelName}')
 
@@ -230,7 +233,7 @@ def updateDescription(slackClient, channelName, description):
 # Checks if user is already in the workspace
 # users.read bot scope required
 def isUserAlreadyInWorkspace(slackClient, user_email):
-    user_data = get_all_user_data(slackClient)
+    user_data = all_user_data
     for user in user_data:
         if user['user_email'] == user_email:
             return True
